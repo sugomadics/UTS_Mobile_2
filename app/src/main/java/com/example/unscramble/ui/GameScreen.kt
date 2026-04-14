@@ -60,11 +60,13 @@ import com.example.unscramble.ui.theme.UnscrambleTheme
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.example.unscramble.data.HistoryEntity
 
 @Composable
 fun GameScreen(gameViewModel: GameViewModel = viewModel()) {
     var showHistoryDialog by remember { mutableStateOf(false) }
     val gameUiState by gameViewModel.uiState.collectAsState()
+    val historyList by gameViewModel.historyList.collectAsState()
     val mediumPadding = dimensionResource(R.dimen.padding_medium)
 
     Column(
@@ -136,6 +138,7 @@ fun GameScreen(gameViewModel: GameViewModel = viewModel()) {
 
         if (showHistoryDialog) {
             HistoryDialog(
+                historyList = historyList,
                 onDismiss = { showHistoryDialog = false }
             )
         }
@@ -269,20 +272,20 @@ private fun FinalScoreDialog(
         }
     )
 }
-val historyScores = listOf("a", "b", "c")
-val historyWords = listOf(10, 20, 30)
+
 @Composable
 private fun HistoryDialog(
+    historyList: List<HistoryEntity>,
     onDismiss: () -> Unit
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(text = "History") },
+        title = { Text("History") },
         text = {
             Column {
-                for (index in historyScores.indices) {
+                historyList.forEachIndexed { index, item ->
                     Text(
-                        text = "Word: ${historyWords[index]} - ${historyScores[index]}"
+                        text = "${index + 1}. ${item.word} - Score: ${item.score}"
                     )
                 }
             }
