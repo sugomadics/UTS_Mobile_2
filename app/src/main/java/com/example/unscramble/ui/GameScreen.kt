@@ -57,9 +57,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.unscramble.R
 import com.example.unscramble.ui.theme.UnscrambleTheme
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
 @Composable
 fun GameScreen(gameViewModel: GameViewModel = viewModel()) {
+    var showHistoryDialog by remember { mutableStateOf(false) }
     val gameUiState by gameViewModel.uiState.collectAsState()
     val mediumPadding = dimensionResource(R.dimen.padding_medium)
 
@@ -116,9 +120,25 @@ fun GameScreen(gameViewModel: GameViewModel = viewModel()) {
                     fontSize = 16.sp
                 )
             }
+
+            OutlinedButton(
+                onClick = { showHistoryDialog = true },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = stringResource(R.string.history),
+                    fontSize = 16.sp
+                )
+            }
         }
 
         GameStatus(score = gameUiState.score, modifier = Modifier.padding(20.dp))
+
+        if (showHistoryDialog) {
+            HistoryDialog(
+                onDismiss = { showHistoryDialog = false }
+            )
+        }
 
         if (gameUiState.isGameOver) {
             FinalScoreDialog(
@@ -245,6 +265,31 @@ private fun FinalScoreDialog(
         confirmButton = {
             TextButton(onClick = onPlayAgain) {
                 Text(text = stringResource(R.string.play_again))
+            }
+        }
+    )
+}
+val historyScores = listOf("a", "b", "c")
+val historyWords = listOf(10, 20, 30)
+@Composable
+private fun HistoryDialog(
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = "History") },
+        text = {
+            Column {
+                for (index in historyScores.indices) {
+                    Text(
+                        text = "Word: ${historyWords[index]} - ${historyScores[index]}"
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close")
             }
         }
     )
